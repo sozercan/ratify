@@ -6,7 +6,7 @@ This README outlines how this validation framework can be used to verify signatu
 A configuration flag called `cosignEnabled` is introduced to the plugin configuration. If this flag is enabled, the `ListReferrers` API will attempt to query for the cosign signatures for a subject in addition to the references queried using `referrers API`. All the cosign signatures are returned as the reference artifacts with the artifact type `org.sigstore.cosign.v1` This option will enable to verify cosign signatures against any registry including the onces that don't support the [notaryproject](https://github.com/notaryproject)'s `referrers` API. 
 
 # Signing
-Please refer cosign documentation on how to sign an image using cosign using [key-pair based signatures]((https://github.com/sigstore/cosign/blob/main/USAGE.md) or [keyless signatures](https://github.com/sigstore/cosign/blob/main/KEYLESS.md).
+Please refer cosign documentation on how to sign an image using cosign using [key-pair based signatures]((https://github.com/sigstore/cosign/blob/main/USAGE.md) and [keyless signatures](https://github.com/sigstore/cosign/blob/main/KEYLESS.md).
 
 # Verification
 
@@ -69,7 +69,7 @@ $ ratify verify --config ~/.ratify/config.json --subject myregistry.io/example/h
 ```
 
 ## Keyless Verification
-This section outlines how to use `ratify` to verify the signatures generated using cosign keyless signatures.
+This section outlines how to use `ratify` to verify the signatures signed using keyless signatures.
 
 ### Configuration
 
@@ -138,5 +138,30 @@ $ ratify verify --config ~/.ratify/config.json --subject myregistry.io/example/h
       "artifactType": "org.sigstore.cosign.v1"
     }
   ]
+}
+```
+
+## Order of verification
+
+You can specify multiple cosign verifiers to define different verification policies. For example, you can define a policy to verify the signatures generated using key pairs and a policy to verify the signatures generated using keyless signatures. Order of verification is defined by the order of the verifiers in the config.
+
+```json
+{
+...
+    "verifier": {
+        "version": "1.0.0",
+        "plugins": [
+            {
+                "name":"cosign",
+                "artifactTypes": "org.sigstore.cosign.v1",
+                "key": "/path/to/cosign.pub"
+            },
+            {
+                "name":"cosign",
+                "artifactTypes": "org.sigstore.cosign.v1",
+                "rekorURL": "https://rekor.sigstore.dev"
+            }
+        ]
+    }
 }
 ```
