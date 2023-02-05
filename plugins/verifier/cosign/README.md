@@ -3,9 +3,9 @@
 This README outlines how this validation framework can be used to verify signatures generated using [cosign](https://github.com/sigstore/cosign/tree/cb0c46a429253287429868c3721c9f8693797114). The verifier is added as a plugin to the framework that uses [cosign](https://github.com/sigstore/cosign/tree/cb0c46a429253287429868c3721c9f8693797114) packages to invoke the verification of an image. Currently cosign verifier works with remote registry that can provide cosign related artifacts linked as specially formatted tag to the subject artifact. It works only with [ociregistry](../../referrerstore/ociregistry) referrer store plugin that uses the OCI registry API to discover and fetch the artifacts. 
 
 ### Fallback in OCIRegistry store
-A configuration flag called ```cosign-enabled``` is introduced to the plugin configuration. If this flag is enabled, the ```ListReferrers``` API will attempt to query for the cosign signatures for a subject in addition to the references queried using ```referrers API```. All the cosign signatures are returned as the reference artifacts with the artifact type ```org.sigstore.cosign.v1``` This option will enable to verify cosign signatures against any registry including the onces that don't support the [notaryproject](https://github.com/notaryproject)'s ```referrers API```. 
+A configuration flag called `cosignEnabled` is introduced to the plugin configuration. If this flag is enabled, the ```ListReferrers``` API will attempt to query for the cosign signatures for a subject in addition to the references queried using ```referrers API```. All the cosign signatures are returned as the reference artifacts with the artifact type ```org.sigstore.cosign.v1``` This option will enable to verify cosign signatures against any registry including the onces that don't support the [notaryproject](https://github.com/notaryproject)'s ```referrers API```. 
 
-IMPORTANT NOTE: Cosign signatures cannot be verified from private registries. ```cosign-enabled``` flag should not be enabled for any private registry scenario even for non-cosign signature verifications.
+IMPORTANT NOTE: Cosign signatures cannot be verified from private registries. `cosignEnabled` flag should not be enabled for any private registry scenario even for non-cosign signature verifications.
 
 ### Configuration
 The only configuration that is needed for cosign verifier is the path to the public key that is used to verify the signature. This is specified using ```key``` property in the plugin config. Here is the sample ```ratify``` config with cosign verifier
@@ -16,8 +16,8 @@ The only configuration that is needed for cosign verifier is the path to the pub
         "version": "1.0.0",
         "plugins": [
             {
-                "name": "ociregistry",
-                "cosign-enabled": true
+                "name": "oras",
+                "cosignEnabled": true
             }
         ]
     },
@@ -26,7 +26,7 @@ The only configuration that is needed for cosign verifier is the path to the pub
         "plugin": {
             "name": "configPolicy",
             "artifactVerificationPolicies": {
-                "application/vnd.cncf.notary.signature": "any"
+                "org.sigstore.cosign.v1": "any"
             }
         }
     },
