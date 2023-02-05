@@ -207,8 +207,8 @@ e2e-cosign-setup:
 
 	# images signed with fulcio root CA
 	echo 'FROM alpine\nCMD ["echo", "cosign keyless signed image"]' > .staging/cosign/Dockerfile.keyless
-	docker build -t ${LOCAL_TEST_REGISTRY}/cosign:keyless-signed .staging/cosign -f .staging/cosign/Dockerfile.keyless
-	docker push ${LOCAL_TEST_REGISTRY}/cosign:keyless-signed
+	docker build -t ${LOCAL_TEST_REGISTRY}/cosign:signed-keyless .staging/cosign -f .staging/cosign/Dockerfile.keyless
+	docker push ${LOCAL_TEST_REGISTRY}/cosign:signed-keyless
 
 	# unsigned image
 	docker pull ${LOCAL_UNSIGNED_IMAGE}
@@ -219,7 +219,7 @@ e2e-cosign-setup:
 	cd .staging/cosign && \
 	./cosign-linux-amd64 generate-key-pair && \
 	./cosign-linux-amd64 sign --key cosign.key `docker image inspect ${LOCAL_TEST_REGISTRY}/cosign:signed | jq -r .[0].RepoDigests[0]` && \
-	COSIGN_EXPERIMENTAL=1 ./cosign-linux-amd64 sign `docker image inspect ${LOCAL_TEST_REGISTRY}/cosign:keyless-signed | jq -r .[0].RepoDigests[0]` && \
+	COSIGN_EXPERIMENTAL=1 ./cosign-linux-amd64 sign `docker image inspect ${LOCAL_TEST_REGISTRY}/cosign:signed-keyless | jq -r .[0].RepoDigests[0]` && \
 	./cosign-linux-amd64 sign --key cosign.key `docker image inspect ${LOCAL_TEST_REGISTRY}/all:v0 | jq -r .[0].RepoDigests[0]`
 
 e2e-licensechecker-setup:
