@@ -15,6 +15,7 @@ LDFLAGS += -X $(GO_PKG)/internal/version.GitTag=$(GIT_TAG)
 KIND_VERSION ?= 0.14.0
 KUBERNETES_VERSION ?= 1.25.4
 GATEKEEPER_VERSION ?= 3.11.0
+COSIGN_VERSION ?= 1.13.1
 
 HELM_VERSION ?= 3.9.2
 BATS_TESTS_FILE ?= test/bats/test.bats
@@ -195,14 +196,21 @@ e2e-notaryv2-setup:
 e2e-cosign-setup:
 	rm -rf .staging/cosign
 	mkdir -p .staging/cosign
-	wget https://github.com/sigstore/cosign/releases/download/v1.13.1/cosign-linux-amd64 
+	wget https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-amd64 
 	mv cosign-linux-amd64 .staging/cosign
 	chmod +x .staging/cosign/cosign-linux-amd64
 
+	# image signed with a key
 	echo 'FROM alpine\nCMD ["echo", "cosign signed image"]' > .staging/cosign/Dockerfile
 	docker build -t ${LOCAL_TEST_REGISTRY}/cosign:signed .staging/cosign
 	docker push ${LOCAL_TEST_REGISTRY}/cosign:signed
 
+	# images signed with fulcio root CA
+	echo 'FROM alpine\nCMD ["echo", "cosign keyless signed image"]' > .staging/cosign/Dockerfile.keyless
+	docker build -t ${LOCAL_TEST_REGISTRY}/cosign:keyless-signed .staging/cosign -f .staging/cosign/Dockerfile.keyless
+	docker push ${LOCAL_TEST_REGISTRY}/cosign:keyless-signed
+
+	# unsigned image
 	docker pull ${LOCAL_UNSIGNED_IMAGE}
 	docker image tag ${LOCAL_UNSIGNED_IMAGE} ${LOCAL_TEST_REGISTRY}/cosign:unsigned
 	docker push ${LOCAL_TEST_REGISTRY}/cosign:unsigned
@@ -211,6 +219,7 @@ e2e-cosign-setup:
 	cd .staging/cosign && \
 	./cosign-linux-amd64 generate-key-pair && \
 	./cosign-linux-amd64 sign --key cosign.key `docker image inspect ${LOCAL_TEST_REGISTRY}/cosign:signed | jq -r .[0].RepoDigests[0]` && \
+	COSIGN_EXPERIMENTAL=1 ./cosign-linux-amd64 sign `docker image inspect ${LOCAL_TEST_REGISTRY}/cosign:keyless-signed | jq -r .[0].RepoDigests[0]` && \
 	./cosign-linux-amd64 sign --key cosign.key `docker image inspect ${LOCAL_TEST_REGISTRY}/all:v0 | jq -r .[0].RepoDigests[0]`
 
 e2e-licensechecker-setup:

@@ -29,6 +29,10 @@
                 "key": ".staging/cosign/cosign.pub"
             },
             {
+                "name": "cosign",
+                "artifactTypes": "org.sigstore.cosign.v1"
+            },
+            {
                 "name": "notaryv2",
                 "artifactTypes": "application/vnd.cncf.notary.signature",
                 "verificationCerts": [
