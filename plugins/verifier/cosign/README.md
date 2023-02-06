@@ -141,9 +141,9 @@ $ ratify verify --config ~/.ratify/config.json --subject myregistry.io/example/h
 }
 ```
 
-## Order of verification
+## Multiple Verifiers
 
-You can specify multiple cosign verifiers to define different verification policies. For example, you can define a policy to verify the signatures generated using key pairs and a policy to verify the signatures generated using keyless signatures. Order of verification is defined by the order of the verifiers in the config.
+You can specify multiple cosign verifiers to define different verification policies. For example, you can define a policy to verify the signatures generated using key pairs and a policy to verify the signatures generated using keyless signatures. This is useful when you want to verify the signatures generated using different methods.
 
 ```json
 {
@@ -163,5 +163,30 @@ You can specify multiple cosign verifiers to define different verification polic
             }
         ]
     }
+}
+```
+
+All the verifiers will be executed and the verification status will be reported in the `verifierReports` field.
+
+```bash
+ratify verify --config ~/.ratify/config.json --subject myregistry.io/example/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
+{
+  "isSuccess": true,
+  "verifierReports": [
+        {
+      "subject": "myregistry.io/example/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4",
+      "isSuccess": false,
+      "name": "cosign",
+      "message": "cosign verification failed with error no matching signatures:\ninvalid signature when validating ASN.1 encoded signature\n invalid signature when validating ASN.1 encoded signature",
+      "artifactType": "org.sigstore.cosign.v1"
+    },
+    {
+      "subject": "myregistry.io/example/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4",
+      "isSuccess": true,
+      "name": "cosign",
+      "message": "cosign verification success. valid signatures found",
+      "artifactType": "org.sigstore.cosign.v1"
+    }
+  ]
 }
 ```

@@ -102,10 +102,8 @@ deploy-gatekeeper:
 	helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
 	helm install gatekeeper/gatekeeper  \
 		--version ${GATEKEEPER_VERSION} \
-	    --name-template=gatekeeper \
-	    --namespace ${GATEKEEPER_NAMESPACE} --create-namespace \
-	    --set enableExternalData=true \
-	    --set controllerManager.dnsPolicy=ClusterFirst,audit.dnsPolicy=ClusterFirst \
+		--name-template=gatekeeper \
+		--namespace ${GATEKEEPER_NAMESPACE} --create-namespace
 
 .PHONY: delete-gatekeeper
 delete-gatekeeper:
