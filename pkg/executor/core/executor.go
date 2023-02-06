@@ -163,6 +163,7 @@ func (ex Executor) verifyReference(ctx context.Context, subjectRef common.Refere
 			verifyResult.ArtifactType = referenceDesc.ArtifactType
 			verifyResults = append(verifyResults, verifyResult)
 			isSuccess = verifyResult.IsSuccess
+			break
 		}
 	}
 
