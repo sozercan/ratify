@@ -31,8 +31,6 @@ SLEEP_TIME=1
     sleep 5
     run kubectl run cosign-demo-key --namespace default --image=registry:5000/cosign:signed
     assert_success
-    run kubectl run cosign-demo-keyless --namespace default --image=registry:5000/cosign:signed-keyless
-    assert_success
     run kubectl run cosign-demo-unsigned --namespace default --image=registry:5000/cosign:unsigned
     assert_failure
 

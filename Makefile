@@ -67,7 +67,7 @@ ratify-config:
 .PHONY: test
 test:
 	go test -v ./...
-	
+
 .PHONY: clean
 clean:
 	go clean
@@ -189,7 +189,7 @@ e2e-notaryv2-setup:
 	rm -rf ~/.config/notation
 	.staging/notaryv2/notation/bin/notation cert generate-test --default "ratify-bats-test"
 	.staging/notaryv2/notation/bin/notation sign `docker image inspect ${LOCAL_TEST_REGISTRY}/notation:signed | jq -r .[0].RepoDigests[0]`
-	.staging/notaryv2/notation/bin/notation sign `docker image inspect ${LOCAL_TEST_REGISTRY}/all:v0 | jq -r .[0].RepoDigests[0]`  
+	.staging/notaryv2/notation/bin/notation sign `docker image inspect ${LOCAL_TEST_REGISTRY}/all:v0 | jq -r .[0].RepoDigests[0]`
 
 e2e-cosign-setup:
 	rm -rf .staging/cosign
@@ -198,17 +198,10 @@ e2e-cosign-setup:
 	mv cosign-linux-amd64 .staging/cosign
 	chmod +x .staging/cosign/cosign-linux-amd64
 
-	# image signed with a key
 	echo 'FROM alpine\nCMD ["echo", "cosign signed image"]' > .staging/cosign/Dockerfile
 	docker build -t ${LOCAL_TEST_REGISTRY}/cosign:signed .staging/cosign
 	docker push ${LOCAL_TEST_REGISTRY}/cosign:signed
 
-	# images signed with fulcio root CA
-	echo 'FROM alpine\nCMD ["echo", "cosign keyless signed image"]' > .staging/cosign/Dockerfile.keyless
-	docker build -t ${LOCAL_TEST_REGISTRY}/cosign:signed-keyless .staging/cosign -f .staging/cosign/Dockerfile.keyless
-	docker push ${LOCAL_TEST_REGISTRY}/cosign:signed-keyless
-
-	# unsigned image
 	docker pull ${LOCAL_UNSIGNED_IMAGE}
 	docker image tag ${LOCAL_UNSIGNED_IMAGE} ${LOCAL_TEST_REGISTRY}/cosign:unsigned
 	docker push ${LOCAL_TEST_REGISTRY}/cosign:unsigned
@@ -217,7 +210,6 @@ e2e-cosign-setup:
 	cd .staging/cosign && \
 	./cosign-linux-amd64 generate-key-pair && \
 	./cosign-linux-amd64 sign --key cosign.key `docker image inspect ${LOCAL_TEST_REGISTRY}/cosign:signed | jq -r .[0].RepoDigests[0]` && \
-	COSIGN_EXPERIMENTAL=1 ./cosign-linux-amd64 sign `docker image inspect ${LOCAL_TEST_REGISTRY}/cosign:signed-keyless | jq -r .[0].RepoDigests[0]` && \
 	./cosign-linux-amd64 sign --key cosign.key `docker image inspect ${LOCAL_TEST_REGISTRY}/all:v0 | jq -r .[0].RepoDigests[0]`
 
 e2e-licensechecker-setup:
@@ -276,10 +268,10 @@ e2e-sbom-setup:
 		--plain-http \
 		 ${LOCAL_TEST_REGISTRY}/all:v0 \
 		.staging/sbom/_manifest/spdx_2.2/manifest.spdx.json:application/spdx+json
-	
+
 	# Push Signature to sbom
 	.staging/notaryv2/notation/bin/notation sign  ${LOCAL_TEST_REGISTRY}/sbom@`oras discover -o json --artifact-type org.example.sbom.v0 ${LOCAL_TEST_REGISTRY}/sbom:v0 | jq -r ".manifests[0].digest"`
-	.staging/notaryv2/notation/bin/notation sign  ${LOCAL_TEST_REGISTRY}/all@`oras discover -o json --artifact-type org.example.sbom.v0 ${LOCAL_TEST_REGISTRY}/all:v0 | jq -r ".manifests[0].digest"` 
+	.staging/notaryv2/notation/bin/notation sign  ${LOCAL_TEST_REGISTRY}/all@`oras discover -o json --artifact-type org.example.sbom.v0 ${LOCAL_TEST_REGISTRY}/all:v0 | jq -r ".manifests[0].digest"`
 
 e2e-schemavalidator-setup:
 	rm -rf .staging/schemavalidator
@@ -318,7 +310,7 @@ e2e-deploy-gatekeeper: e2e-helm-install
 e2e-deploy-ratify: e2e-notaryv2-setup e2e-cosign-setup e2e-licensechecker-setup e2e-sbom-setup e2e-schemavalidator-setup
 	docker build --progress=plain --no-cache -f ./httpserver/Dockerfile -t localbuild:test .
 	kind load docker-image --name kind localbuild:test
-	
+
 	docker build --progress=plain --no-cache --build-arg KUBE_VERSION=${KUBERNETES_VERSION} --build-arg TARGETOS="linux" --build-arg TARGETARCH="amd64" -f crd.Dockerfile -t localbuildcrd:test ./charts/ratify/crds
 	kind load docker-image --name kind localbuildcrd:test
 

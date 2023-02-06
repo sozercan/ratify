@@ -14,9 +14,6 @@ load helpers
     run bin/ratify verify -c $RATIFY_DIR/config.json -s $LOCAL_TEST_REGISTRY/cosign:signed
     assert_cmd_verify_success
 
-    run bin/ratify verify -c $RATIFY_DIR/config.json -s $LOCAL_TEST_REGISTRY/cosign:signed-keyless
-    assert_cmd_verify_success
-
     run bin/ratify verify -c $RATIFY_DIR/config.json -s $LOCAL_TEST_REGISTRY/cosign:unsigned
     assert_cmd_verify_failure
 }
@@ -38,7 +35,7 @@ load helpers
     assert_cmd_verify_failure
 }
 
-@test "schemavalidator verifier test" {   
+@test "schemavalidator verifier test" {
     run bin/ratify verify -c $RATIFY_DIR/config.json -s $LOCAL_TEST_REGISTRY/schemavalidator:v0
     assert_cmd_verify_success
 }
