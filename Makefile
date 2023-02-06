@@ -194,7 +194,7 @@ e2e-notaryv2-setup:
 e2e-cosign-setup:
 	rm -rf .staging/cosign
 	mkdir -p .staging/cosign
-	wget https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-amd64 
+	curl -sSLO https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-amd64
 	mv cosign-linux-amd64 .staging/cosign
 	chmod +x .staging/cosign/cosign-linux-amd64
 
